@@ -11,45 +11,35 @@ import { withStyles } from '@material-ui/core/styles';
 
 const styles = theme => ({
   root: {
-    width: '100%', //너비가 100%
-    marginTop: theme.spacing.unit*3,  //위쪽으로 여백을 3의 가중치만큼 줌
-    overflowX: 'auto' //X축으로 오버플로우가 발생할 수 있도록 처리
+    width: '100%', 
+    marginTop: theme.spacing(3), 
+    overflowX: 'auto' 
   },
   table: {
-    minWidth: 1080 //테이블은 1080픽셀이상 출력할 수 있게 함.(화면의 크기가 줄어들어도 전체 1080픽셀만큼은 무조건 테이블의 크기가 자리잡아서 가로 스크롤바가 생김.)
+    minWidth: 1080 
   }
 })
-const customers = [
-{
-  'id' : 1,
-  'image' : 'https://placeimg.com/64/64/1',
-  'name' : '윤동주',
-  'birthday' : '980817',
-  'gender' : '남성',
-  'job' : '대학생'
-},
-{
-  'id' : 2,
-  'image' : 'https://placeimg.com/64/64/2',
-  'name' : '짭동주',
-  'birthday' : '980815',
-  'gender' : '여성',
-  'job' : '중학생'
-},
-{
-  'id' : 3,
-  'image' : 'https://placeimg.com/64/64/3',
-  'name' : '간동주',
-  'birthday' : '980819',
-  'gender' : '중성',
-  'job' : '고등학생'
-}
 
-]
 
 class App extends Component {
+
+  state = { //데이터가 변경될 수 있을 때는 state로 customers 변수를 명시해 줌.
+    customers: ""
+  }
+
+  componentDidMount() { //API 서버에 접근을 해서 데이터를 받아오는 등의 작업을 함. 모든 컴포넌트가 mount가 되었을 때 실행되는 부분임.
+    this.callApi() //어떠한 API를 불러올 수 있게함.
+      .then(res => this.setState({customers: res})) //callApi에서 return한 값을 res로 받고 그걸 state의 customers라는 변수에 넣어줌.
+      .catch(err => console.log(err)); //error 발생 시 console창에 해당 오류를 출력.
+  }
+
+  callApi = async () => { //callApi는 비동기적으로 어떠한 내용을 수행할 수 있게 해줌.
+    const response = await fetch('/api/customers'); //response에 접속하고자 하는 api 주소를 넣음.
+    const body = await response.json(); //그 주소에서 받아온 json형의 데이터를 body에 넣음.
+    return body;
+  }
 	render() {
-    const { classes } = this.props; //위에서 정의한 styles가 적용될 수 있게 함.
+    const { classes } = this.props; //props는 변경될 수 없는 데이터를 명시할 때 씀. 여기서는 classes가 css를 나타내는 역할을 하므로 고정적임.
     return (
       <Paper className = {classes.root}>
         <Table className = {classes.table}>
@@ -64,7 +54,8 @@ class App extends Component {
             </TableRow>
           </TableHead>
           <TableBody>
-            {customers.map(c => { return ( <Customer key = {c.id} id ={c.id} image ={c.image} name ={c.name} birthday ={c.birthday} gender = {c.gender} job = {c.job} />)})}
+            {this.state.customers ? this.state.customers.map(c => { return ( <Customer key = {c.id} id ={c.id} image ={c.image} name ={c.name} birthday ={c.birthday} gender = {c.gender} job = {c.job} />); 
+            }) : "" }
           </TableBody>
         </Table>
       </Paper>
