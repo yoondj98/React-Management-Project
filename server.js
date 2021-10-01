@@ -1,3 +1,4 @@
+const fs = require('fs') //파일에 접근할 수 있는 라이브러리
 const express = require('express'); 
 const bodyParser = require('body-parser'); 
 const app = express();
@@ -6,34 +7,25 @@ const port = process.env.PORT || 5000;
 app.use(bodyParser.json()); //기본적으로 REST API에서는 데이터를 주고 받을 때 json이라는 일종의 데이터형식을 이용해서 데이터를 주고받음.
 app.use(bodyParser.urlencoded({extended: true}));
 
+const data = fs.readFileSync('./database.json');
+const conf = JSON.parse(data); //해당 환경설정 데이터를 파싱해서 가져옴
+const mysql = require('mysql');
+
+const connection = mysql.createConnection({ //연결과 관련한 변수 설정
+  host: conf.host,
+  user: conf.user,
+  password: conf.password,
+  port: conf.port,
+  database: conf.database
+})
+connection.connect(); //커넥팅을 진행
 app.get('/api/customers', (req, res) => {
-    res.send([
-        {
-          'id' : 1,
-          'image' : 'https://placeimg.com/64/64/1',
-          'name' : '윤동주',
-          'birthday' : '980817',
-          'gender' : '남성',
-          'job' : '대학생'
-        },
-        {
-          'id' : 2,
-          'image' : 'https://placeimg.com/64/64/2',
-          'name' : '짭동주',
-          'birthday' : '980815',
-          'gender' : '여성',
-          'job' : '중학생'
-        },
-        {
-          'id' : 3,
-          'image' : 'https://placeimg.com/64/64/3',
-          'name' : '간동주',
-          'birthday' : '980819',
-          'gender' : '중성',
-          'job' : '고등학생'
-        }
-    
-    ]);
+    connection.query( //쿼리를 날림
+      "SELECT * FROM CUSTOMER", //CUSTOMER 테이블에 접근해서 데이터를 가져옴
+      (err, rows, fields) => {
+        res.send(rows); //가져온 데이터는 rows라는 변수로 처리해서 보여줌
+      }
+    )
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}`));

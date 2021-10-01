@@ -3,7 +3,10 @@
 # dependencies
 /node_modules
 /.pnp
-.pnp.js
+.pnp.js\
+
+#database
+/database.json
 
 # testing
 /coverage
